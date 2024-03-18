@@ -26,51 +26,43 @@ class BaseModel:
 
     def __init__(self, *args, **kwargs):
         """
-        Public instance artributes initialization after creation
-
-        Args:
-            *args(args): arguments
-            **kwargs(dict): attrubute values
-
+        Initializes a new instance of the BaseModel class
         """
-        DATE_TIME_FORMAT = '%Y-%m-%dT%H:%M:%S.%f'
-        if not kwargs:
-            self.id = str(uuid4())
-            self.created_at = datetime.utcnow()
-            self.updated_at = datetime.utcnow()
-            models.storage.new(self)
-        else:
+        self.id = str(uuid.uuid4())
+        self.created_at = datetime.now()
+        self.updated_at = self.created_at
+
+        if kwargs:
+            if "__class__" in kwargs:
+                kwargs.pop("__class__")
+
             for key, value in kwargs.items():
-                if key in ("updated_at", "created_at"):
-                    self.__dict__[key] = datetime.strptime(
-                        value, DATE_TIME_FORMAT)
-                elif key[0] == "id":
-                    self.__dict__[key] = str(value)
-                else:
-                    self.__dict__[key] = value
+                if key in ['created_at', 'updated_at']:
+                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
+                setattr(self, key, value)
+        else:
+            models.storage.new(self)
 
     def __str__(self):
-        """Returns string representation of the class
+        """
+        Returns a string representaton of the BaseModel odject.
         """
         return "[{}] ({}) {}".format(self.__class__.__name__,
                                      self.id, self.__dict__)
 
     def save(self):
-        """Updates the public instance attribute:
-        'updated_at' - with the current datetime
         """
-        self.updated_at = datetime.utcnow()
+        Updates the "updated_at" attribute with the current datetime
+        """
+        self.updated_at = datetime.now()
         models.storage.save()
 
     def to_dict(self):
-        """Method returns a dictionary containing
-        all keys/values of __dict__ instance
         """
-        map_objects = {}
-        for key, value in self.__dict__.items():
-            if key == "created_at" or key == "updated_at":
-                map_objects[key] = value.isoformat()
-            else:
-                map_objects[key] = value
-        map_objects["__class__"] = self.__class__.__name__
-        return map_objects
+        Returns a dictionary representation of the BaseModel object.
+        """
+        obj_dict = self.__dict__.copy()
+        obj_dict['__class__'] = self.__class__.__name__
+        obj_dict['created_at'] = self.created_at.isoformat()
+        obj_dict['updated_at'] = self.updated_at.isoformat()
+        return obj_dict
