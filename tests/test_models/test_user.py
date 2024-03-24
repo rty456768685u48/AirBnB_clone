@@ -1,44 +1,58 @@
-#!/usr/bin/python3
-"""
-Test suits for amenities
-"""
-import os
+#!/usr/bin/env python3
 import unittest
 from models.user import User
 
 
-class TestUserModel(unittest.TestCase):
-    """
-    Each test method focuses on testing a specific attribute of the User model.
-    """
+class TestUser(unittest.TestCase):
 
-    def test_email_attribute(self):
-        """
-        Test that the email attribute of User is set correctly.
-        """
-        user = User(email="user@example.com")
-        self.assertEqual(user.email, "user@example.com")
+    def setUp(self):
+        self.user = User()
 
-    def test_password_attribute(self):
-        """
-        Test that the password attribute of User is set correctly.
-        """
-        user = User(password="securepassword")
-        self.assertEqual(user.password, "securepassword")
+    def test_user_instance(self):
+        self.assertIsInstance(self.user, User)
 
-    def test_first_name_attribute(self):
-        """
-        Test that the first_name attribute of User is set correctly.
-        """
-        user = User(first_name="John")
-        self.assertEqual(user.first_name, "John")
+    def test_user_attributes(self):
+        self.assertEqual(self.user.email, "")
+        self.assertEqual(self.user.password, "")
+        self.assertEqual(self.user.first_name, "")
+        self.assertEqual(self.user.last_name, "")
 
-    def test_last_name_attribute(self):
-        """
-        Test that the last_name attribute of User is set correctly.
-        """
-        user = User(last_name="Doe")
-        self.assertEqual(user.last_name, "Doe")
+    def test_user_attribute_types(self):
+        self.assertIsInstance(self.user.email, str)
+        self.assertIsInstance(self.user.password, str)
+        self.assertIsInstance(self.user.first_name, str)
+        self.assertIsInstance(self.user.last_name, str)
+
+    def test_user_inherited_attributes(self):
+        self.assertTrue(hasattr(self.user, "id"))
+        self.assertTrue(hasattr(self.user, "created_at"))
+        self.assertTrue(hasattr(self.user, "updated_at"))
+
+    def test_user_str_representation(self):
+        expected = "[{}] ({}) {}".format(self.user.__class__.__name__,
+                                         self.user.id,
+                                         self.user.__dict__)
+        self.assertEqual(str(self.user), expected)
+
+    def test_user_to_dict_method(self):
+        self.user.email = "me@yahoo.com"
+        self.user.password = "my password"
+        self.user.first_name = "Boomni"
+        self.user.last_name = "Jonathan"
+        dict_representation = self.user.to_dict()
+        self.assertIsInstance(dict_representation, dict)
+        self.assertEqual(dict_representation["email"], "me@yahoo.com")
+        self.assertEqual(dict_representation["password"], "my password")
+        self.assertEqual(dict_representation["first_name"], "Boomni")
+        self.assertEqual(dict_representation["last_name"], "Jonathan")
+        self.assertEqual(dict_representation["__class__"], "User")
+        self.assertTrue("id" in dict_representation)
+        self.assertTrue("created_at" in dict_representation)
+        self.assertTrue("updated_at" in dict_representation)
+
+    def test_user_save_method(self):
+        self.user.save()
+        self.assertNotEqual(self.user.created_at, self.user.updated_at)
 
 
 if __name__ == '__main__':
