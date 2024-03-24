@@ -19,7 +19,3 @@ class User(BaseModel):
     password = ""
     first_name = ""
     last_name = ""
-
-    def __init__(self, *args, **kwargs):
-        """ Inherits from Basemodel init"""
-        super().__init__(**kwargs)
